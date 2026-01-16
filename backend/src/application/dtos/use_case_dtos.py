@@ -168,14 +168,6 @@ class SynthesisOutput:
 
 
 @dataclass(frozen=True)
-class EndConversationInput:
-    """Input for ending a conversation with optional summary generation."""
-
-    conversation_id: UUID
-    generate_summary: bool = True
-
-
-@dataclass(frozen=True)
 class ConversationSummaryOutput:
     """Output representing a conversation summary."""
 
