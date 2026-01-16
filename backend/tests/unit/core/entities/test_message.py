@@ -92,3 +92,35 @@ class TestMessageReconstitute:
         )
         assert msg.content == ""
 
+
+class TestMessageAttachFeedback:
+    """Tests for Message.attach_feedback() method."""
+
+    def test_attach_feedback_to_user_message(self, sample_feedback):
+        """Should attach feedback to user message."""
+        msg = Message.create(content="Hello", role=MessageRole.USER)
+
+        msg.attach_feedback(sample_feedback)
+
+        assert msg.feedback == sample_feedback
+
+    def test_attach_feedback_to_coach_message_raises(self, sample_feedback):
+        """Should reject attaching feedback to coach messages."""
+        msg = Message.create(content="Hi there!", role=MessageRole.COACH)
+
+        with pytest.raises(InvalidMessageContentError, match="Only user messages"):
+            msg.attach_feedback(sample_feedback)
+
+    def test_attach_feedback_when_already_has_feedback_raises(self, sample_feedback):
+        """Should reject duplicate feedback attachment."""
+        msg = Message.create(content="Hello", role=MessageRole.USER)
+        msg.attach_feedback(sample_feedback)
+
+        from src.core.entities.feedback import Feedback
+
+        other_feedback = Feedback.create(corrections=[], suggestions=["Other"])
+
+        with pytest.raises(InvalidMessageContentError, match="already has feedback"):
+            msg.attach_feedback(other_feedback)
+
+

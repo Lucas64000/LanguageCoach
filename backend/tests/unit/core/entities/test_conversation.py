@@ -14,6 +14,7 @@ import time
 import pytest
 
 from src.core.entities.conversation import Conversation, ConversationStatus
+from src.core.entities.conversation_summary import ConversationSummary
 from src.core.entities.message import Message, MessageRole
 from src.core.exceptions import (
     InvalidContextError,
@@ -328,3 +329,68 @@ class TestConversationTimestampManagement:
         active_conversation.add_message("Test", MessageRole.USER)
 
         assert active_conversation.updated_at > original
+
+
+class TestConversationAttachSummary:
+    """Tests for Conversation.attach_summary() method."""
+
+    def test_attach_summary_to_completed_conversation(self, active_conversation):
+        """Should attach summary to completed conversation."""
+
+        summary = ConversationSummary.create(
+            fluency_score=80,
+            strengths=["Good vocabulary"],
+            weaknesses=["Verb tenses"],
+            overall_remarks="Well done!",
+        )
+        active_conversation.end()
+
+        active_conversation.attach_summary(summary)
+
+        assert active_conversation.summary == summary
+
+    def test_attach_summary_to_active_conversation_raises(self, active_conversation):
+        """Should reject attaching summary to active conversation."""
+        summary = ConversationSummary.create(
+            fluency_score=80,
+            strengths=[],
+            weaknesses=[],
+            overall_remarks="",
+        )
+
+        with pytest.raises(InvalidConversationStateError, match="only.*completed"):
+            active_conversation.attach_summary(summary)
+
+    def test_attach_summary_to_archived_conversation_raises(self, active_conversation):
+        """Should reject attaching summary to archived conversation."""
+        summary = ConversationSummary.create(
+            fluency_score=80,
+            strengths=[],
+            weaknesses=[],
+            overall_remarks="",
+        )
+        active_conversation.archive()
+
+        with pytest.raises(InvalidConversationStateError, match="only.*completed"):
+            active_conversation.attach_summary(summary)
+
+    def test_attach_summary_when_already_has_summary_raises(self, active_conversation):
+        """Should reject duplicate summary attachment."""
+        summary1 = ConversationSummary.create(
+            fluency_score=80,
+            strengths=[],
+            weaknesses=[],
+            overall_remarks="First",
+        )
+        summary2 = ConversationSummary.create(
+            fluency_score=90,
+            strengths=[],
+            weaknesses=[],
+            overall_remarks="Second",
+        )
+        active_conversation.end()
+        active_conversation.attach_summary(summary1)
+
+        with pytest.raises(InvalidConversationStateError, match="already has a summary"):
+            active_conversation.attach_summary(summary2)
+
