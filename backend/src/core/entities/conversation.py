@@ -11,12 +11,15 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from enum import Enum
+from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
 
 from src.core.value_objects import ConversationTone, ConversationStatus
 from src.core.entities.message import Message, MessageRole
 from src.core.exceptions import InvalidContextError, InvalidConversationStateError
+
+if TYPE_CHECKING:
+    from src.core.entities.conversation_summary import ConversationSummary
 
 
 @dataclass
@@ -43,6 +46,7 @@ class Conversation:
     updated_at: datetime = field(default_factory=lambda: datetime.now(UTC))
     status: ConversationStatus = ConversationStatus.ACTIVE
     tone: ConversationTone = field(default=ConversationTone.FRIENDLY)
+    summary: ConversationSummary | None = None
 
     @property
     def is_active(self) -> bool:
@@ -99,6 +103,7 @@ class Conversation:
         updated_at: datetime,
         status: ConversationStatus = ConversationStatus.ACTIVE,
         tone: ConversationTone = ConversationTone.FRIENDLY,
+        summary: ConversationSummary | None = None,
     ) -> Conversation:
         """
         Loader method for reconstructing from persistence (NO validation).
@@ -113,6 +118,7 @@ class Conversation:
             updated_at: When the conversation was last modified.
             status: Current status of the conversation.
             tone: The coaching tone.
+            summary: Optional conversation summary.
 
         Returns:
             A reconstituted Conversation instance.
@@ -125,6 +131,7 @@ class Conversation:
             updated_at=updated_at,
             status=status,
             tone=tone,
+            summary=summary,
         )
 
     def archive(self) -> None:
@@ -184,4 +191,24 @@ class Conversation:
         self._touch()
         return message
 
+    def attach_summary(self, summary: ConversationSummary) -> None:
+        """
+        Attach a summary to this conversation.
+
+        Args:
+            summary: The summary to attach.
+
+        Raises:
+            InvalidConversationStateError: If not completed or already has summary.
+        """
+        if self.status != ConversationStatus.COMPLETED:
+            raise InvalidConversationStateError(
+                "Can only attach summary to completed conversation"
+            )
+        if self.summary is not None:
+            raise InvalidConversationStateError(
+                "Conversation already has a summary"
+            )
+        self.summary = summary
+        self._touch()
 

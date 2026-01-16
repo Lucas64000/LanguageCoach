@@ -108,3 +108,19 @@ class Message:
             created_at=created_at,
             feedback=feedback,
         )
+
+    def attach_feedback(self, feedback: Feedback) -> None:
+        """
+        Attach feedback to this message.
+
+        Args:
+            feedback: The feedback to attach.
+
+        Raises:
+            InvalidMessageContentError: If message is not from USER or already has feedback.
+        """
+        if self.role != MessageRole.USER:
+            raise InvalidMessageContentError("Only user messages can receive feedback")
+        if self.feedback is not None:
+            raise InvalidMessageContentError("Message already has feedback")
+        self.feedback = feedback

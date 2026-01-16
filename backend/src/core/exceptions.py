@@ -49,6 +49,12 @@ class FeedbackNotFoundError(DomainException):
     pass
 
 
+class InvalidFeedbackError(DomainException):
+    """Raised when feedback data is invalid (e.g., score out of range)."""
+
+    pass
+
+
 # --- ConversationPartner Port Failures ---
 
 
