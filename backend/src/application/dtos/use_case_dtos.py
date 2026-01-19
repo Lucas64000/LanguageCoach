@@ -15,7 +15,6 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from uuid import UUID
 
-
 # =============================================================================
 # CONVERSATION LIFECYCLE DTOs
 # =============================================================================
@@ -165,6 +164,13 @@ class SynthesisOutput:
 # =============================================================================
 # CONVERSATION SUMMARY DTOs
 # =============================================================================
+
+
+@dataclass(frozen=True)
+class CreateSummaryInput:
+    """Input for creating a conversation summary."""
+
+    conversation_id: UUID
 
 
 @dataclass(frozen=True)
