@@ -4,7 +4,7 @@ Unit tests for FeedbackUseCases.
 Tests both requesting and rating feedback functionality.
 """
 
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 
 import pytest
@@ -29,6 +29,7 @@ class TestRequestFeedback:
         self,
         mock_repository: AsyncMock,
         mock_feedback_provider: AsyncMock,
+        mock_feedback_metrics: MagicMock,
         sample_feedback: Feedback,
     ) -> None:
         """request() raises for COACH messages."""
@@ -37,7 +38,9 @@ class TestRequestFeedback:
         mock_repository.get_by_message_id.return_value = conv
         mock_feedback_provider.analyze_message.return_value = sample_feedback
 
-        use_case = FeedbackUseCases(mock_repository, mock_feedback_provider)
+        use_case = FeedbackUseCases(
+            mock_repository, mock_feedback_provider, mock_feedback_metrics
+        )
 
         with pytest.raises(InvalidMessageContentError, match="Only user messages"):
             await use_case.request(RequestFeedbackInput(message_id=coach_msg.id))
@@ -46,6 +49,7 @@ class TestRequestFeedback:
         self,
         mock_repository: AsyncMock,
         mock_feedback_provider: AsyncMock,
+        mock_feedback_metrics: MagicMock,
         sample_feedback: Feedback,
         sample_conversation_with_message: tuple[Conversation, Message],
     ) -> None:
@@ -54,7 +58,9 @@ class TestRequestFeedback:
         mock_repository.get_by_message_id.return_value = conv
         mock_feedback_provider.analyze_message.return_value = sample_feedback
 
-        use_case = FeedbackUseCases(mock_repository, mock_feedback_provider)
+        use_case = FeedbackUseCases(
+            mock_repository, mock_feedback_provider, mock_feedback_metrics
+        )
         result = await use_case.request(RequestFeedbackInput(message_id=msg.id))
 
         assert result == FeedbackMapper.to_output(sample_feedback)
@@ -65,6 +71,7 @@ class TestRequestFeedback:
         self,
         mock_repository: AsyncMock,
         mock_feedback_provider: AsyncMock,
+        mock_feedback_metrics: MagicMock,
         sample_feedback: Feedback,
         sample_conversation_with_message: tuple[Conversation, Message],
     ) -> None:
@@ -73,7 +80,9 @@ class TestRequestFeedback:
         mock_repository.get_by_message_id.return_value = conv
         mock_feedback_provider.analyze_message.return_value = sample_feedback
 
-        use_case = FeedbackUseCases(mock_repository, mock_feedback_provider)
+        use_case = FeedbackUseCases(
+            mock_repository, mock_feedback_provider, mock_feedback_metrics
+        )
         await use_case.request(RequestFeedbackInput(message_id=msg.id))
 
         # Verify feedback was attached to the message
@@ -83,6 +92,7 @@ class TestRequestFeedback:
         self,
         mock_repository: AsyncMock,
         mock_feedback_provider: AsyncMock,
+        mock_feedback_metrics: MagicMock,
         sample_feedback: Feedback,
         sample_conversation_with_message: tuple[Conversation, Message],
     ) -> None:
@@ -91,7 +101,9 @@ class TestRequestFeedback:
         mock_repository.get_by_message_id.return_value = conv
         mock_feedback_provider.analyze_message.return_value = sample_feedback
 
-        use_case = FeedbackUseCases(mock_repository, mock_feedback_provider)
+        use_case = FeedbackUseCases(
+            mock_repository, mock_feedback_provider, mock_feedback_metrics
+        )
         await use_case.request(RequestFeedbackInput(message_id=msg.id))
 
         mock_repository.save.assert_called_once_with(conv)
@@ -100,13 +112,16 @@ class TestRequestFeedback:
         self,
         mock_repository: AsyncMock,
         mock_feedback_provider: AsyncMock,
+        mock_feedback_metrics: MagicMock,
     ) -> None:
         """request() raises MessageNotFoundError when message not in repo."""
         mock_repository.get_by_message_id.side_effect = MessageNotFoundError(
             "Message not found"
         )
 
-        use_case = FeedbackUseCases(mock_repository, mock_feedback_provider)
+        use_case = FeedbackUseCases(
+            mock_repository, mock_feedback_provider, mock_feedback_metrics
+        )
 
         with pytest.raises(MessageNotFoundError):
             await use_case.request(RequestFeedbackInput(message_id=uuid4()))
@@ -115,6 +130,7 @@ class TestRequestFeedback:
         self,
         mock_repository: AsyncMock,
         mock_feedback_provider: AsyncMock,
+        mock_feedback_metrics: MagicMock,
         sample_feedback: Feedback,
         sample_conversation_with_message: tuple[Conversation, Message],
     ) -> None:
@@ -128,7 +144,9 @@ class TestRequestFeedback:
         new_feedback = Feedback.create(corrections=[], suggestions=["New suggestion"])
         mock_feedback_provider.analyze_message.return_value = new_feedback
 
-        use_case = FeedbackUseCases(mock_repository, mock_feedback_provider)
+        use_case = FeedbackUseCases(
+            mock_repository, mock_feedback_provider, mock_feedback_metrics
+        )
 
         with pytest.raises(InvalidMessageContentError, match="already has feedback"):
             await use_case.request(RequestFeedbackInput(message_id=msg.id))
@@ -141,13 +159,16 @@ class TestRateFeedback:
         self,
         mock_repository: AsyncMock,
         mock_feedback_provider: AsyncMock,
+        mock_feedback_metrics: MagicMock,
         sample_conversation_with_feedback: tuple[Conversation, Message],
     ) -> None:
         """rate() updates rating if called multiple times."""
         conv, msg = sample_conversation_with_feedback
         mock_repository.get_by_message_id.return_value = conv
 
-        use_case = FeedbackUseCases(mock_repository, mock_feedback_provider)
+        use_case = FeedbackUseCases(
+            mock_repository, mock_feedback_provider, mock_feedback_metrics
+        )
 
         # 1. Initial negative rating with comment
         input1 = RateFeedbackInput(
@@ -183,6 +204,7 @@ class TestRateFeedback:
         self,
         mock_repository: AsyncMock,
         mock_feedback_provider: AsyncMock,
+        mock_feedback_metrics: MagicMock,
     ) -> None:
         """rate() raises FeedbackNotFoundError if message has no feedback."""
         conv = Conversation.create(context_topic="test")
@@ -191,7 +213,9 @@ class TestRateFeedback:
 
         mock_repository.get_by_message_id.return_value = conv
 
-        use_case = FeedbackUseCases(mock_repository, mock_feedback_provider)
+        use_case = FeedbackUseCases(
+            mock_repository, mock_feedback_provider, mock_feedback_metrics
+        )
         input_dto = RateFeedbackInput(message_id=msg.id, rating=True)
 
         with pytest.raises(FeedbackNotFoundError):
