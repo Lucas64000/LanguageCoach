@@ -21,9 +21,9 @@ class SummaryProvider(Protocol):
     Implementations must be in infrastructure layer.
     """
 
-    async def generate_summary(self, conversation: Conversation) -> ConversationSummary:
+    async def create_summary(self, conversation: Conversation) -> ConversationSummary:
         """
-        Generate an end-of-session summary for a conversation.
+        Create an end-of-session summary for a conversation.
 
         Args:
             conversation: The completed conversation to summarize.

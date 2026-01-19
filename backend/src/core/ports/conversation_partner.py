@@ -7,7 +7,8 @@ Core layer must have ZERO external imports.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, AsyncIterator, Protocol
+from collections.abc import AsyncIterator
+from typing import TYPE_CHECKING, Protocol
 
 from src.core.entities.message import Message
 
@@ -58,5 +59,5 @@ class ConversationPartner(Protocol):
         Yields:
             Token strings as they are generated.
         """
-        yield ""  # type: ignore  # pragma: no cover
+        yield ""  # pragma: no cover
         ...

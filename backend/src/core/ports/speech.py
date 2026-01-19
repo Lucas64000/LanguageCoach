@@ -1,5 +1,5 @@
 """
-SpeechRecognizer port - Protocol for speech-to-text transcription.
+SpeechRecognizer port for speech-to-text transcription.
 
 Port defines the contract for generating responses.
 Core layer must have ZERO external imports.

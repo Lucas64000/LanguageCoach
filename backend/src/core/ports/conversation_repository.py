@@ -1,5 +1,5 @@
 """
-Repository ports for conversation domain.
+Repository port for conversation domain.
 
 Port defines the contract for persistence operations.
 Core layer must have ZERO external imports.
