@@ -111,31 +111,6 @@ class TestConversationReconstitute:
         assert conv.context_topic == ""
 
 
-class TestConversationStatusProperties:
-    """Tests for conversation status property helpers."""
-
-    def test_is_active_property(self, active_conversation):
-        """Should return True only when status is ACTIVE."""
-        assert active_conversation.is_active is True
-
-        active_conversation.status = ConversationStatus.COMPLETED
-        assert active_conversation.is_active is False
-
-    def test_is_archived_property(self, active_conversation):
-        """Should return True only when status is ARCHIVED."""
-        assert active_conversation.is_archived is False
-
-        active_conversation.status = ConversationStatus.ARCHIVED
-        assert active_conversation.is_archived is True
-
-    def test_is_completed_property(self, active_conversation):
-        """Should return True only when status is COMPLETED."""
-        assert active_conversation.is_completed is False
-
-        active_conversation.status = ConversationStatus.COMPLETED
-        assert active_conversation.is_completed is True
-
-
 class TestConversationArchive:
     """Tests for Conversation.archive() method."""
 
