@@ -79,6 +79,15 @@ class FeedbackAnalysisError(DomainException):
     pass
 
 
+# --- SummaryProvider Port Failures ---
+
+
+class SummaryGenerationError(DomainException):
+    """Raised when the summary provider cannot generate a summary."""
+
+    pass
+
+
 # --- Speech Ports Failures ---
 
 

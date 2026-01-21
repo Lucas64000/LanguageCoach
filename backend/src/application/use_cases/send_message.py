@@ -5,7 +5,7 @@ Orchestrates sending a message and receiving a coach response.
 Uses DTOs for input and output.
 """
 
-from typing import AsyncIterator
+from collections.abc import AsyncIterator
 
 from src.application.dtos.use_case_dtos import SendMessageInput, SendMessageOutput
 from src.application.mappers import MessageMapper

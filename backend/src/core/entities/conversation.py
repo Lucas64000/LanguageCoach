@@ -14,9 +14,9 @@ from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
 
-from src.core.value_objects import ConversationTone, ConversationStatus
 from src.core.entities.message import Message, MessageRole
 from src.core.exceptions import InvalidContextError, InvalidConversationStateError
+from src.core.value_objects import ConversationStatus, ConversationTone
 
 if TYPE_CHECKING:
     from src.core.entities.conversation_summary import ConversationSummary
@@ -144,7 +144,9 @@ class Conversation:
         if self.status == ConversationStatus.ARCHIVED:
             raise InvalidConversationStateError("Conversation is already archived")
         if self.status == ConversationStatus.COMPLETED:
-            raise InvalidConversationStateError("Cannot archive a completed conversation")
+            raise InvalidConversationStateError(
+                "Cannot archive a completed conversation"
+            )
         self.status = ConversationStatus.ARCHIVED
         self._touch()
 
@@ -165,7 +167,9 @@ class Conversation:
         if self.status == ConversationStatus.COMPLETED:
             raise InvalidConversationStateError("Conversation is already completed")
         if self.status == ConversationStatus.ARCHIVED:
-            raise InvalidConversationStateError("Cannot complete an archived conversation")
+            raise InvalidConversationStateError(
+                "Cannot complete an archived conversation"
+            )
         self.status = ConversationStatus.COMPLETED
         self._touch()
 
@@ -206,9 +210,6 @@ class Conversation:
                 "Can only attach summary to completed conversation"
             )
         if self.summary is not None:
-            raise InvalidConversationStateError(
-                "Conversation already has a summary"
-            )
+            raise InvalidConversationStateError("Conversation already has a summary")
         self.summary = summary
         self._touch()
-

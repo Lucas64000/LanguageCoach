@@ -8,11 +8,8 @@ from src.application.dtos.use_case_dtos import (
     ConversationDetailOutput,
     ConversationOutput,
     ConversationStatusOutput,
-    MessageOutput,
 )
-from src.application.mappers.feedback_mapper import FeedbackMapper
 from src.core.entities.conversation import Conversation
-from src.core.entities.message import Message
 
 
 class ConversationMapper:
